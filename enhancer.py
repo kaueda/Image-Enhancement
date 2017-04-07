@@ -23,8 +23,6 @@ imgG = imGamma(img)
 imgH = imEqualHist(img)
 imgS = imSharp(img)
 
-if()
-
 cv2.destroyAllWindows()
 
 def imLog(imgf)
@@ -43,25 +41,45 @@ def imGamma(imgf, gamma):
 
 
 def imEqualHist(imgf):
-    
+    m, n = imgf.shape[:2]
 
+    factor = 255/(m*n)
+    histogram = imHistogram(imgf)
+    imgg = imgf
 
-def imSharp(imgf):
-    pass
+    for mi in range(m):
+        for ni in range(n):
+        imgg[mi][ni] = factor*histogram[imgf[mi][ni]]
 
+    return imgg
+
+def imSharp(imgf, a, b):
+    # Sharpening array
+    # 0.05   0.1   0.05
+    # 0.1   0.4   0.1
+    # 0.05   0.1   0.05
+    w = np.array([5, 10, 5, 10, 40, 10, 5, 10, 5])/100
+    imgb = cv2.filter2D(imgf, -1, w)
+
+    imgbf = cv2.subtract(imgb, imgf)
+    imgbeta = cv2.multiply(imgbf, b)
+    imgalpha = cv2.multiply(imgf, a)
+    imgg = cv2.add(imgalpha, imgbeta)
+
+    return imgg
 
 def imHistogram(imgf):
-    # numpy way
-    # hist, bins = np.histogram(imgf.ravel(), 256, [0, 256])
-    # return hist
+    hist = [0]*256
 
-    #my way
-    hist = []
+    # grab image F and transforms it into a list of pixels
     imgl = list(imgf.ravel())
-    for i in range(256):
-        hist.append(imgl.count(i))
+
+    # counts the number os pixels of each color (gray shade)
+    for i, val in enumerate(imgl):
+        hist[imgl[i]] += 1
 
     return hist
 
-def showHistogram(h):
-    plt.hist(h, 256, [0, 256])
+def showHistogram(imgf):
+    plt.hist(imgf, 256, [0, 256])
+    plt.show()
