@@ -97,8 +97,17 @@ def showHistogram(imgf, islist=False):
     
     plt.show()
 
-def rmse(imgf, imgg):
-    pass
+def rmsd(imgf, imgg):
+    m, n = imgf.shape[:2]
+    res = 0.0
+
+    for x in range(m):
+        for y in range(n):
+            res += math.pow(float(imgf[x][y]) - float(imgg[x][y]), 2)
+
+    res /= n*m
+
+    return math.sqrt(res)
 
 # 1. Parameter Input
 filename = str(input())
@@ -138,4 +147,9 @@ if (show_flag == 1):
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
-# 5. Output
+# 6. Output
+print("RMSD")
+print("L=" + str(rmsd(img, imgL)))
+print("G=" + str(rmsd(img, imgG)))
+print("H=" + str(rmsd(img, imgH)))
+print("S=" + str(rmsd(img, imgS)))
