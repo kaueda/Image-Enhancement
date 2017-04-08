@@ -7,24 +7,6 @@ import math
 import numpy as np
 from matplotlib import pyplot as plt
 
-# 1. Parameter Input
-filename = str(input())
-gamma = float(input())
-alpha = float(input())
-beta = float(input())
-show_flag = int(input())
-
-# 2. Read the input image
-img = cv2.imread(filename, cv2.IMREAD_GRAYSCALE)
-
-# 3. Aply transformations
-imgL = imLog(img)
-imgG = imGamma(img)
-imgH = imEqualHist(img)
-imgS = imSharp(img)
-
-cv2.destroyAllWindows()
-
 ##
 ## Enhancing Functions
 ##
@@ -56,11 +38,12 @@ def imEqualHist(imgf):
     # Factor (L-1)/(MxN)
     factor = 255/(m*n)
 
-    #cumulative distribution of each gray value
+    # Cumulative distribution of each gray value
     cdf = np.array(imHistogram(imgf)).cumsum()
-    # minimum non-zero value of cdf
+    # Minimum non-zero value of cdf
     cdfmin = cdf[np.nonzero(cdf)].min()
 
+    # Apply equalisation
     imgg = np.float32(imgf)
     for mi in range(m):
         for ni in range(n):
@@ -103,11 +86,56 @@ def imHistogram(imgf):
     return hist
 
 def showHistogram(imgf, islist=False):
-    # Plot histogram directly from image data
     if(islist):
-        for img in imgf:
-            plt.hist(img.ravel(), 256, [0, 256])    
+        for img, lbl in imgf:
+            plt.hist(img.ravel(), 256, [0, 256], label=lbl)
+
+        plt.legend()
+
     else:
         plt.hist(imgf.ravel(), 256, [0, 256])
     
     plt.show()
+
+def rmse(imgf, imgg):
+    pass
+
+# 1. Parameter Input
+filename = str(input())
+gamma = float(input())
+alpha = float(input())
+beta = float(input())
+show_flag = int(input())
+
+# 2. Read the input image
+img = cv2.imread(filename, cv2.IMREAD_GRAYSCALE)
+if img is None:
+    print("could not load image.")
+    exit()
+
+# 3. Aply transformations
+imgL = imLog(img)
+imgG = imGamma(img, gamma)
+imgH = imEqualHist(img)
+imgS = imSharp(img, alpha, beta)
+
+# 4. Show images (depending on flag)
+if (show_flag == 1):
+    cv2.imshow("Original Image", img)
+    cv2.imshow("Logarithm Image", imgL)
+    cv2.imshow("Gamma Image", imgG)
+    cv2.imshow("Histogram Equal Image", imgH)
+    cv2.imshow("Sharpening Image", imgS)
+
+    # 5. Show histogram
+    showHistogram([(img, "original"),
+                   (imgL, "log"), 
+                   (imgG, "gamma"),
+                   (imgH, "histogram"), 
+                   (imgS, "sharpening")]
+    , islist=True)
+
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+
+# 5. Output
